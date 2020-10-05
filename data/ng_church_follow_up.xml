@@ -11,7 +11,5 @@
             <field name="name">First Follow Up</field>
         </record>
 
-
-
-    </data>
+   </data>
 </odoo>

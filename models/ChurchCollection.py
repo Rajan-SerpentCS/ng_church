@@ -69,16 +69,13 @@ class DonationLine(models.Model):
     def _prepare_account_voucher(self):
         """Generate Account Voucher."""
         company = self.env.user and self.env.user.company_id or False
-        voucher = voucher.create({
+        voucher = self.env['account.move'].create({
             'company_id': company and company.id or False,
             'partner_id': self.env.user.partner_id.id,
-            'pay_now': 'pay_now',
-            'account_id': company and company.transit_account and
-            company.transit_account.id or False,
             'journal_id': company and company.donation_journal and
             company.donation_journal.id or False,
             'name': '{} Donation'.format(self.donor_id.name or 'Anonymous'),
-            'voucher_type': 'sale'
+            'type': 'in_invoice',
 
         })
         return voucher
@@ -89,13 +86,13 @@ class DonationLine(models.Model):
             # Quantity is intentionally hard coded to be int: 1.
             'quantity': 1,
             'price_unit': self.amount,
-            'voucher_id': voucher_id and voucher_id.id or False,
+            'move_id': voucher_id and voucher_id.id or False,
             # credit account
             'account_id': self.env.user.company_id and \
             self.env.user.company_id.donation_account and \
             self.env.user.company_id.donation_account.id or False
         }
-        return voucher_line.create(payload)
+        return self.env['account.move.line'].create(payload)
 
     def generate_donation_voucher(self):
         """User Interface button call this method."""
